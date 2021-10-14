@@ -49,8 +49,7 @@ public class EditActivity extends AppCompatActivity {
             }
         });
     }
-
-
+    
     private void updateUi(){
         movieIcon.setImageResource(vm.getMovieData().getValue().mapGenreToId());
         movieTitle.setText(vm.getMovieData().getValue().getName());
