@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">au535993</string>
+    <string name="Plot">Plot</string>
+    <string name="IMDB">"IMDB rating "</string>
+    <string name="UserRate">User Rating</string>
+    <string name="userNotes">User Notes</string>
+    <string name="buttonBack">Back</string>
+    <string name="RateButton">Rate</string>
+    <string name="myNotes">My notes</string>
+    <string name="cancel">Cancel</string>
+    <string name="okButton">OK</string>
+    <string name="year">Year</string>
+    <string name="Genre">Genre</string>
+    <string name="notes">Notes</string>
+    <string name="myRating">My Rating</string>
+    <string name="exitButton">Exit</string>
+</resources>

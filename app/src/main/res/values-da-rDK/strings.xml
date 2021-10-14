@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">au535993</string>
+    <string name="Plot">Plot</string>
+    <string name="IMDB">"IMDB rate "</string>
+    <string name="UserRate">Bruger Rate</string>
+    <string name="userNotes">Bruger Notes</string>
+    <string name="buttonBack">Tilbage</string>
+    <string name="RateButton">Rate</string>
+    <string name="myNotes">Mine noter</string>
+    <string name="cancel">Annuller</string>
+    <string name="okButton">OK</string>
+    <string name="year">År</string>
+    <string name="Genre">Genre</string>
+    <string name="notes">Noter</string>
+    <string name="myRating">Min Rate</string>
+    <string name="exitButton">Afslut</string>
+</resources>
