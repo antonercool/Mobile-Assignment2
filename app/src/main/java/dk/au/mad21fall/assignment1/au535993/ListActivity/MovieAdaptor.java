@@ -1,6 +1,5 @@
 package dk.au.mad21fall.assignment1.au535993.ListActivity;
 
-import android.graphics.Movie;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +9,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
-import dk.au.mad21fall.assignment1.au535993.ListActivity.Models.MovieData;
+import dk.au.mad21fall.assignment1.au535993.Database.MovieEntity;
 import dk.au.mad21fall.assignment1.au535993.ListActivity.MovieItemClickedListener.IMovieItemClickedListener;
 import dk.au.mad21fall.assignment1.au535993.R;
 
 public class MovieAdaptor extends RecyclerView.Adapter<MovieAdaptor.MovieViewHolder> {
 
     // data for the adaptor
-    private ArrayList<MovieData> movieDataList;
+    private List<MovieEntity> movieDataList;
 
     // callback interface for user action on each movie item
     private IMovieItemClickedListener movieItemClickedListener;
@@ -30,7 +29,7 @@ public class MovieAdaptor extends RecyclerView.Adapter<MovieAdaptor.MovieViewHol
         this.movieItemClickedListener = movieItemClickedListener;
     }
 
-    public void updateMovieList(ArrayList<MovieData> newMovieData)
+    public void updateMovieList(List<MovieEntity> newMovieData)
     {
         movieDataList = newMovieData;
         notifyDataSetChanged();
@@ -50,15 +49,18 @@ public class MovieAdaptor extends RecyclerView.Adapter<MovieAdaptor.MovieViewHol
     // When ever the user scrolls, it needs to request new data
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        holder.movieName.setText(movieDataList.get(position).name);
+        holder.movieName.setText(movieDataList.get(position).getName());
         holder.movieIcon.setImageResource(movieDataList.get(position).mapGenreToId());
-        holder.movieRating.setText(movieDataList.get(position).userRating);
-        holder.movieYear.setText(movieDataList.get(position).year);
+        holder.movieRating.setText(movieDataList.get(position).getUserRating());
+        holder.movieYear.setText(movieDataList.get(position).getYear());
     }
 
     @Override
     public int getItemCount() {
-        return movieDataList.size();
+        if (movieDataList == null)
+            return 0;
+        else
+            return movieDataList.size();
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

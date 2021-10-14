@@ -17,15 +17,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import dk.au.mad21fall.assignment1.au535993.Database.MovieEntity;
 import dk.au.mad21fall.assignment1.au535993.EditActivity.EditActivity;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.DataLoader.MovieDataLoader;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.Models.SingleMovieDataViewModel;
+import dk.au.mad21fall.assignment1.au535993.DetailsActivity.ViewModel.DetailsViewModel;
 import dk.au.mad21fall.assignment1.au535993.Utils.IntentConstants;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.DataLoader.MovieDataJsonWriter;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.Models.MovieData;
 import dk.au.mad21fall.assignment1.au535993.R;
 import dk.au.mad21fall.assignment1.au535993.Utils.Utils;
 
@@ -39,7 +34,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     Button detailsBackButton, detailsRatingButton;
 
-    private SingleMovieDataViewModel vm;
+    private DetailsViewModel vm;
 
     ActivityResultLauncher<Intent> editActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -51,18 +46,19 @@ public class DetailsActivity extends AppCompatActivity {
         Utils.hideBlueBar(this);
         setContentView(R.layout.activity_details);
 
-        MovieData movieData = MovieDataLoader.loadDataFromIntent(getIntent(), IntentConstants.DETAILS);
+        Intent intent = getIntent();
+        int uid = Integer.parseInt(intent.getStringExtra(IntentConstants.DETAILS));
 
         // Create a ViewModel the first time the system calls an activity's onCreate() method.
         // Re-created activities receive the same MyViewModel instance created by the first activity.
-        vm = new ViewModelProvider(this).get(SingleMovieDataViewModel.class);
+        vm = new ViewModelProvider(this).get(DetailsViewModel.class);
         //  only if not created already
-        vm.createMovieData(movieData);
+        vm.createMovieData(this, uid);
 
         // observe any changes to the MovieDataObject
-        vm.getMovieData().observe(this, new Observer<MovieData>() {
+        vm.getMovieData().observe(this, new Observer<MovieEntity>() {
             @Override
-            public void onChanged(MovieData movieData) {
+            public void onChanged(MovieEntity movieEntity) {
                 updateUi();
             }
         });
@@ -71,13 +67,13 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void updateUi(){
-        detailsYear.setText(vm.getMovieData().getValue().year);
-        detailsGenre.setText(vm.getMovieData().getValue().genre);
-        detailsPlot.setText(vm.getMovieData().getValue().plot);
-        detailsIBDMValue.setText(vm.getMovieData().getValue().rating);
-        detailsName.setText(vm.getMovieData().getValue().name);
-        detailsUserRating.setText(vm.getMovieData().getValue().userRating);
-        detailsUserNotesValue.setText(vm.getMovieData().getValue().notes);
+        detailsYear.setText(vm.getMovieData().getValue().getYear());
+        detailsGenre.setText(vm.getMovieData().getValue().getGenre());
+        detailsPlot.setText(vm.getMovieData().getValue().getPlot());
+        detailsIBDMValue.setText(vm.getMovieData().getValue().getRating());
+        detailsName.setText(vm.getMovieData().getValue().getName());
+        detailsUserRating.setText(vm.getMovieData().getValue().getUserRating());
+        detailsUserNotesValue.setText(vm.getMovieData().getValue().getNotes());
 
         detailsIcon.setImageResource(vm.getMovieData().getValue().mapGenreToId());
     }
@@ -101,10 +97,10 @@ public class DetailsActivity extends AppCompatActivity {
         detailsRatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject jsonObject = MovieDataJsonWriter.convertMovieDataToJson(vm.getMovieData().getValue());
+                int uid = vm.getMovieData().getValue().uid;
 
                 Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
-                editIntent.putExtra(IntentConstants.EDIT, jsonObject.toString());
+                editIntent.putExtra(IntentConstants.EDIT, String.valueOf(uid));
 
                 Log.d(TAG, "Edit button clicked ");
                 editActivityLauncher.launch(editIntent);
@@ -115,8 +111,6 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent resultIntent = new Intent();
-                JSONObject movieDataInJson = MovieDataJsonWriter.convertMovieDataToJson(vm.getMovieData().getValue());
-                resultIntent.putExtra(IntentConstants.DETAILS, movieDataInJson.toString());
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
@@ -128,15 +122,8 @@ public class DetailsActivity extends AppCompatActivity {
         @Override
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == Activity.RESULT_OK) {
-                Intent data = result.getData();
-                try {
-                    JSONObject movieDataInJson = new JSONObject(data.getStringExtra(IntentConstants.EDIT));
-                    MovieData newMovieData = MovieDataJsonWriter.convertJsonToMovieData(movieDataInJson);
                     // update the movieData with data from edit view
-                    vm.updateMovieData(newMovieData);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                    vm.movieDataUpdated();
             }
             else if(result.getResultCode() == Activity.RESULT_CANCELED){
                 // do nothing since we dont wanna save the data

@@ -12,13 +12,9 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import dk.au.mad21fall.assignment1.au535993.ListActivity.DataLoader.MovieDataLoader;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.Models.SingleMovieDataViewModel;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.DataLoader.MovieDataJsonWriter;
-import dk.au.mad21fall.assignment1.au535993.ListActivity.Models.MovieData;
+import dk.au.mad21fall.assignment1.au535993.Database.MovieEntity;
+import dk.au.mad21fall.assignment1.au535993.DetailsActivity.ViewModel.DetailsViewModel;
+import dk.au.mad21fall.assignment1.au535993.EditActivity.ViewModel.EditViewModel;
 import dk.au.mad21fall.assignment1.au535993.R;
 import dk.au.mad21fall.assignment1.au535993.Utils.IntentConstants;
 import dk.au.mad21fall.assignment1.au535993.Utils.Utils;
@@ -30,7 +26,7 @@ public class EditActivity extends AppCompatActivity {
     SeekBar ratingSeekBar;
     Button okButton, cancelButton;
 
-    SingleMovieDataViewModel vm;
+    DetailsViewModel vm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +36,15 @@ public class EditActivity extends AppCompatActivity {
 
         setUpUiElements();
         // load data from intent
-        MovieData movieData = MovieDataLoader.loadDataFromIntent(getIntent(), IntentConstants.EDIT);
+        int uid = Integer.parseInt(getIntent().getStringExtra(IntentConstants.EDIT));
 
         // only created once, until destroyed
-        vm = new ViewModelProvider(this).get(SingleMovieDataViewModel.class);
-        vm.createMovieData(movieData);
+        vm = new ViewModelProvider(this).get(EditViewModel.class);
+        vm.createMovieData(this, uid);
 
-        vm.getMovieData().observe(this, new Observer<MovieData>() {
+        vm.getMovieData().observe(this, new Observer<MovieEntity>() {
             @Override
-            public void onChanged(MovieData movieData) {
+            public void onChanged(MovieEntity movieEntity) {
                 updateUi();
             }
         });
@@ -57,11 +53,11 @@ public class EditActivity extends AppCompatActivity {
 
     private void updateUi(){
         movieIcon.setImageResource(vm.getMovieData().getValue().mapGenreToId());
-        movieTitle.setText(vm.getMovieData().getValue().name);
-        myRatingValue.setText(vm.getMovieData().getValue().userRating);
-        myNotesValue.setText(vm.getMovieData().getValue().notes);
-        if (!vm.getMovieData().getValue().userRating.equals("X.X")) {
-            ratingSeekBar.setProgress((int) (Double.parseDouble(vm.getMovieData().getValue().userRating) * 10));
+        movieTitle.setText(vm.getMovieData().getValue().getName());
+        myRatingValue.setText(vm.getMovieData().getValue().getUserRating());
+        myNotesValue.setText(vm.getMovieData().getValue().getNotes());
+        if (!vm.getMovieData().getValue().getUserRating().equals("X.X")) {
+            ratingSeekBar.setProgress((int) (Double.parseDouble(vm.getMovieData().getValue().getUserRating()) * 10));
         }
     }
 
@@ -76,8 +72,8 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 double value = (double)i;
-                vm.getMovieData().getValue().userRating = String.valueOf(value/10);
-                myRatingValue.setText(vm.getMovieData().getValue().userRating);
+                vm.getMovieData().getValue().setUserRating(String.valueOf(value/10));
+                myRatingValue.setText(vm.getUserRating());
             }
 
             @Override
@@ -96,10 +92,7 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveData();
-                Intent resultIntent = new Intent();
-                JSONObject movieDataInJson = MovieDataJsonWriter.convertMovieDataToJson(vm.getMovieData().getValue());
-                resultIntent.putExtra(IntentConstants.EDIT, movieDataInJson.toString());
-                setResult(RESULT_OK, resultIntent);
+                setResult(RESULT_OK, new Intent());
                 finish();
             }
         });
@@ -118,5 +111,6 @@ public class EditActivity extends AppCompatActivity {
     private void saveData(){
         vm.updateMovieDataNotes(myNotesValue.getText().toString());
         vm.updateMovieDataUserRating(myRatingValue.getText().toString());
+        vm.persist();
     }
 }
