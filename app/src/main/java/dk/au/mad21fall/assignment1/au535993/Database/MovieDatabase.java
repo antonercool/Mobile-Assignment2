@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {MovieEntity.class}, version=6, exportSchema = false)
+@Database(entities = {MovieEntity.class}, version=9, exportSchema = false)
 public abstract class MovieDatabase extends RoomDatabase{
 
     // mandatory Data acces object
@@ -23,7 +23,6 @@ public abstract class MovieDatabase extends RoomDatabase{
                             MovieDatabase.class,
                             "movie_database")
                             .fallbackToDestructiveMigration()
-                            .allowMainThreadQueries()
                             .build();
                 }
             }

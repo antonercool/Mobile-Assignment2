@@ -35,12 +35,12 @@ public class EditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit);
 
         setUpUiElements();
-        // load data from intent
+        // load primary key from intent
         int uid = Integer.parseInt(getIntent().getStringExtra(IntentConstants.EDIT));
 
         // only created once, until destroyed
         vm = new ViewModelProvider(this).get(EditViewModel.class);
-        vm.createMovieData(this, uid);
+        vm.initViewModel(this, uid);
 
         vm.getMovieData().observe(this, new Observer<MovieEntity>() {
             @Override
@@ -49,7 +49,7 @@ public class EditActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     private void updateUi(){
         movieIcon.setImageResource(vm.getMovieData().getValue().mapGenreToId());
         movieTitle.setText(vm.getMovieData().getValue().getName());
@@ -110,6 +110,5 @@ public class EditActivity extends AppCompatActivity {
     private void saveData(){
         vm.updateMovieDataNotes(myNotesValue.getText().toString());
         vm.updateMovieDataUserRating(myRatingValue.getText().toString());
-        vm.persist();
     }
 }

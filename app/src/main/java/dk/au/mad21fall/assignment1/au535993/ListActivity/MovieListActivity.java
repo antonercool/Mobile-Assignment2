@@ -16,12 +16,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.List;
 
 import dk.au.mad21fall.assignment1.au535993.Database.MovieEntity;
 import dk.au.mad21fall.assignment1.au535993.DetailsActivity.DetailsActivity;
 import dk.au.mad21fall.assignment1.au535993.ListActivity.ViewModel.ListViewViewModel;
+import dk.au.mad21fall.assignment1.au535993.Services.NotificationService;
 import dk.au.mad21fall.assignment1.au535993.Utils.IntentConstants;
 import dk.au.mad21fall.assignment1.au535993.ListActivity.MovieItemClickedListener.IMovieItemClickedListener;
 import dk.au.mad21fall.assignment1.au535993.R;
@@ -35,6 +37,8 @@ public class MovieListActivity extends AppCompatActivity  implements IMovieItemC
     // adaptor
     private MovieAdaptor movieAdaptor;
     private Button exitButton;
+    private Button addButton;
+    private EditText searchField;
 
     private ListViewViewModel vm;
 
@@ -51,11 +55,11 @@ public class MovieListActivity extends AppCompatActivity  implements IMovieItemC
 
         setUpUiElements();
 
-
+        startService(new Intent(this, NotificationService.class));
         // only created once, until destroyed
         vm = new ViewModelProvider(this).get(ListViewViewModel.class);
         // Only load data from .csv once
-        vm.createMovieData(this);
+        vm.initViewModel(this);
         vm.getMovieData().observe(this, new Observer<List<MovieEntity>>() {
             @Override
             public void onChanged(List<MovieEntity> movieEntities) {
@@ -73,6 +77,16 @@ public class MovieListActivity extends AppCompatActivity  implements IMovieItemC
             }
         });
 
+        addButton = findViewById(R.id.buttonAdd);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String movieTitle = searchField.getText().toString().trim();
+                vm.addNewMovieIfExits(movieTitle, getApplicationContext());
+            }
+        });
+
+        searchField = findViewById(R.id.editTextTitle);
         movieAdaptor = new MovieAdaptor(this);
         recyclerView = findViewById(R.id.movieRcvList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -89,7 +103,7 @@ public class MovieListActivity extends AppCompatActivity  implements IMovieItemC
         Intent detailsIntent = new Intent(this, DetailsActivity.class);
         detailsIntent.putExtra(IntentConstants.DETAILS, String.valueOf(clickedObject.uid));
 
-        Log.d(LogTag, "onMovieItemClicked ");
+        Log.d(LogTag, "onMovieItemClicked");
         detailActivityLauncher.launch(detailsIntent);
     }
 
@@ -99,7 +113,7 @@ public class MovieListActivity extends AppCompatActivity  implements IMovieItemC
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 // update movieData in list
-                vm.dataUpdated();
+                //vm.dataUpdated();
             }
         }
     }

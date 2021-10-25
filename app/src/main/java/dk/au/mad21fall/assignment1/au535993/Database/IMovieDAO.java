@@ -9,6 +9,8 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
 
 // TODO make operations async
@@ -17,10 +19,16 @@ public interface IMovieDAO {
 
 
     @Query("SELECT * FROM movies")
+    LiveData<List<MovieEntity>> getAllLive();
+
+    @Query("SELECT * FROM movies")
     List<MovieEntity> getAll();
 
     @Query("SELECT * FROM movies WHERE uid LIKE :uid")
-    MovieEntity findMovie(int uid);
+    LiveData<MovieEntity> findMovieLive(int uid);
+
+    @Query("SELECT * FROM movies WHERE name LIKE :name")
+    ListenableFuture<MovieEntity> findMovie(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addMovie(MovieEntity movie);

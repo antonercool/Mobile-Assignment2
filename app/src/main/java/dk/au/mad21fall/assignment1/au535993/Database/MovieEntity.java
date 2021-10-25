@@ -5,6 +5,9 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,13 +19,23 @@ public class MovieEntity {
     @PrimaryKey(autoGenerate = true)
     public int uid;
 
-    private String name;
-    private String genre;
-    private String plot;
-    private String year;
-    private String rating;
-    private String notes;
-    private String userRating;
+    @Expose
+    @SerializedName("Title")
+    public String name;
+    @Expose
+    @SerializedName("Genre")
+    public String genre;
+    @Expose
+    @SerializedName("Plot")
+    public String plot;
+    @Expose
+    @SerializedName("Year")
+    public String year;
+    @Expose
+    @SerializedName("imdbRating")
+    public String rating;
+    public String notes;
+    public String userRating;
     public String position;
 
     @Ignore
@@ -112,6 +125,22 @@ public class MovieEntity {
     }
 
     public int mapGenreToId(){
-        return genreMapping.get(this.genre);
+        if (this.genre.split(",").length >1){
+            String firstGenre = this.genre.split(",")[0];
+            if (genreMapping.containsKey(firstGenre)){
+                return genreMapping.get(firstGenre);
+            }
+            else {
+                // take Western per default if genre is not known
+                return genreMapping.get("Western");
+            }
+        }
+        if (genreMapping.containsKey(this.genre)){
+            return genreMapping.get(this.genre);
+        }
+        else
+        {
+            return genreMapping.get("Western");
+        }
     }
 }

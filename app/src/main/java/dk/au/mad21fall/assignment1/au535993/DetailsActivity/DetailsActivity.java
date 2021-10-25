@@ -32,7 +32,7 @@ public class DetailsActivity extends AppCompatActivity {
     TextView detailsName, detailsYear, detailsGenre, detailsPlot, detailsIBDMValue, detailsUserNotesValue,detailsUserRating;
     ImageView detailsIcon;
 
-    Button detailsBackButton, detailsRatingButton;
+    Button detailsBackButton, detailsRatingButton, deleteButton;
 
     private DetailsViewModel vm;
 
@@ -47,19 +47,22 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
 
         Intent intent = getIntent();
+        // Fetch
         int uid = Integer.parseInt(intent.getStringExtra(IntentConstants.DETAILS));
 
         // Create a ViewModel the first time the system calls an activity's onCreate() method.
         // Re-created activities receive the same MyViewModel instance created by the first activity.
         vm = new ViewModelProvider(this).get(DetailsViewModel.class);
         //  only if not created already
-        vm.createMovieData(this, uid);
+        vm.initViewModel(this, uid);
 
         // observe any changes to the MovieDataObject
         vm.getMovieData().observe(this, new Observer<MovieEntity>() {
             @Override
             public void onChanged(MovieEntity movieEntity) {
-                updateUi();
+                // if deleted
+                if (movieEntity != null)
+                    updateUi();
             }
         });
 
@@ -115,6 +118,17 @@ public class DetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        deleteButton = findViewById(R.id.deleteButton);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vm.deleteMovie();
+                Intent resultIntent = new Intent();
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            }
+        });
     }
 
     private class ActivityResultMovieEdit implements ActivityResultCallback<ActivityResult> {
@@ -123,7 +137,7 @@ public class DetailsActivity extends AppCompatActivity {
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == Activity.RESULT_OK) {
                     // update the movieData with data from edit view
-                    vm.movieDataUpdated();
+                    //vm.movieDataUpdated();
             }
             else if(result.getResultCode() == Activity.RESULT_CANCELED){
                 // do nothing since we dont wanna save the data
